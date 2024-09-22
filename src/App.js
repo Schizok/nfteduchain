@@ -1,8 +1,44 @@
 import React, { useState } from 'react';
-import logo from './logo.png'
+import { useNavigate } from 'react-router-dom';
+import logo from './logo.png';
+import { connectWallet } from './utils/wallet';
+import { addUserToDatabase } from './utils/database';
 
 const LoginPage = () => {
   const [userType, setUserType] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    if (!userType) {
+      alert('Please select a user type');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { walletAddress } = await connectWallet();
+      await addUserToDatabase(walletAddress, userType);
+      alert('Login successful and user data stored!');
+      // Redirect based on user type
+      if (userType === 'student') {
+        navigate('/student-dashboard');
+      }
+      if (userType === 'institution') {
+        navigate('/institution-dashboard');
+      }
+      if (userType === 'verifier') {
+        navigate('/verifier-dashboard');
+      }
+      // Add other user type redirections here
+    } catch (error) {
+      console.error('Login or database error:', error);
+      alert('Error logging in or saving data.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -10,7 +46,7 @@ const LoginPage = () => {
       <div className="w-1/2 flex flex-col items-center justify-center bg-white p-12">
         <div className="w-full max-w-md">
           <h1 className="text-4xl font-bold mb-6 text-center">Welcome</h1>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">User Type</label>
             <select
@@ -25,8 +61,12 @@ const LoginPage = () => {
             </select>
           </div>
 
-          <button className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300">
-            Login with MetaMask Wallet
+          <button
+            onClick={handleLogin}
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Logging in...' : 'Login with MetaMask Wallet'}
           </button>
         </div>
       </div>
