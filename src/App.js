@@ -6,6 +6,7 @@ import { addUserToDatabase } from './utils/database';
 
 const LoginPage = () => {
   const [userType, setUserType] = useState('');
+  const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -14,12 +15,16 @@ const LoginPage = () => {
       alert('Please select a user type');
       return;
     }
+    if (!name) {
+      alert(`Please enter ${userType === 'student' ? 'student name' : userType === 'institution' ? 'institution name' : 'verifier name'}`);
+      return;
+    }
 
     setIsLoading(true);
 
     try {
       const { walletAddress } = await connectWallet();
-      await addUserToDatabase(walletAddress, userType);
+      await addUserToDatabase(walletAddress, userType, name);
       alert('Login successful and user data stored!');
       // Redirect based on user type
       if (userType === 'student') {
@@ -60,6 +65,21 @@ const LoginPage = () => {
               <option value="verifier">Verifier</option>
             </select>
           </div>
+           {/* Conditional input field for name based on selected userType */}
+           {userType && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {userType === 'student' ? 'Student Name' : userType === 'institution' ? 'Institution Name' : 'Verifier Name'}
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder={`Enter ${userType === 'student' ? 'student name' : userType === 'institution' ? 'institution name' : 'verifier name'}`}
+              />
+            </div>
+          )}
 
           <button
             onClick={handleLogin}

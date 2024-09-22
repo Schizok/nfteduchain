@@ -1,7 +1,7 @@
 import { db } from './firebase';
 import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
 
-export const addUserToDatabase = async (walletAddress, userType) => {
+export const addUserToDatabase = async (walletAddress, userType, name) => {
   try {
     // Reference to the document with walletAddress as the document ID
     const userDocRef = doc(db, 'users', walletAddress);
@@ -18,6 +18,7 @@ export const addUserToDatabase = async (walletAddress, userType) => {
     await setDoc(userDocRef, {
       walletAddress,
       userType,
+      name,
       createdAt: Timestamp.now(),
     });
 
